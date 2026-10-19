@@ -1,0 +1,33 @@
+{
+  "name": "opencode-a2a",
+  "version": "0.1.0",
+  "description": "Agent-to-agent messaging between OpenCode v2 sessions, on one server or across servers.",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "keywords": [
+    "opencode-plugin",
+    "opencode",
+    "a2a",
+    "agents"
+  ],
+  "exports": {
+    ".": "./server.js",
+    "./server": "./server.js"
+  },
+  "files": [
+    "server.js",
+    "src",
+    "README.md",
+    "RIGHTS.md",
+    "LICENSE",
+    "assets"
+  ],
+  "engines": {
+    "node": ">=20.3"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "main": "server.js"
+}
