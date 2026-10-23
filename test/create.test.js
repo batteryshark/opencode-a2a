@@ -62,6 +62,7 @@ test("a2a_create locally nests under the caller by default", async () => {
   assert.deepEqual(body.metadata.a2a, { createdBy: `laptop/${CALLER}`, parent: `laptop/${CALLER}`, nested: true })
   assert.equal(r.metadata.a2a.nested, true)
   assert.equal(r.metadata.a2a.parentID, CALLER)
+  assert.deepEqual(JSON.parse(JSON.stringify(r.metadata)), r.metadata)
   assert.match(r.content, /nested under this session/)
 })
 
@@ -70,6 +71,8 @@ test("a2a_create nest:false creates a root session in the caller's directory", a
   for (const nest of [false, "false"]) {
     const r = await tools.a2a_create.execute({ server: "local", title: "solo", nest }, ctx)
     assert.equal(r.metadata.a2a.ok, true, r.content)
+    assert.equal("parentID" in r.metadata.a2a, false)
+    assert.deepEqual(JSON.parse(JSON.stringify(r.metadata)), r.metadata)
   }
   for (const body of local.created) {
     assert.equal(body.parentID, undefined)
@@ -88,6 +91,8 @@ test("a2a_create to a peer never sends parentID; the parent is recorded in metad
   assert.equal(body.metadata.a2a.parent, `laptop/${CALLER}`)
   assert.equal(body.metadata.a2a.nested, false)
   assert.equal(r.metadata.a2a.nested, false)
+  assert.equal("parentID" in r.metadata.a2a, false)
+  assert.deepEqual(JSON.parse(JSON.stringify(r.metadata)), r.metadata)
 })
 
 test("a different local directory turns nesting off; the same one keeps it", async () => {
@@ -97,8 +102,20 @@ test("a different local directory turns nesting off; the same one keeps it", asy
   assert.equal(local.created[0].parentID, undefined)
   assert.deepEqual(local.created[0].location, { directory: "/other" })
   assert.match(r.content, /Not nested/)
+  assert.equal("parentID" in r.metadata.a2a, false)
+  assert.deepEqual(JSON.parse(JSON.stringify(r.metadata)), r.metadata)
   await tools.a2a_create.execute({ server: "local", directory: "/work/caller/" }, ctx)
   assert.equal(local.created[1].parentID, CALLER)
+})
+
+test("a2a_create without caller context returns JSON-safe root metadata", async () => {
+  const { local, tools } = setup()
+  const r = await tools.a2a_create.execute({ server: "local", directory: "/work/standalone" }, {})
+  assert.equal(r.metadata.a2a.ok, true, r.content)
+  assert.equal(r.metadata.a2a.nested, false)
+  assert.equal("parentID" in r.metadata.a2a, false)
+  assert.deepEqual(JSON.parse(JSON.stringify(r.metadata)), r.metadata)
+  assert.equal(local.created[0].parentID, undefined)
 })
 
 test("title is optional and never prefixed", async () => {

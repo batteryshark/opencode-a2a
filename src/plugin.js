@@ -388,7 +388,7 @@ function tools(state) {
       try {
         if (typeof input.server !== "string" || !input.server.trim()) return fail("server is required (\"local\" or a configured peer name)")
         const w = await createWorker(state, input, context)
-        return ok(`Created ${describeCreated(w)}.${w.note} Message it with a2a_send.`, { to: `${w.server}/${w.sessionId}`, nested: w.nested, parentID: w.nested ? context.sessionID : undefined })
+        return ok(`Created ${describeCreated(w)}.${w.note} Message it with a2a_send.`, { to: `${w.server}/${w.sessionId}`, nested: w.nested, ...(w.nested ? { parentID: context.sessionID } : {}) })
       } catch (error) {
         return fail(error?.message ?? String(error))
       }
